@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A Special Question ❤️</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #ff3366;
+            --secondary: #ffccd5;
+            --text: #4a4a4a;
+            --glass: rgba(255, 255, 255, 0.85);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at center, #ff9a9e, #fad0c4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- 1. FALLING RIBBONS & HEARTS BACKGROUND --- */
+        .falling-bg {
+            position: absolute;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .fall-item {
+            position: absolute;
+            top: -10%;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* --- 2. GLASS CARD DESIGN --- */
+        .card {
+            position: relative;
+            z-index: 10;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 15px 40px rgba(255, 51, 102, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        /* Photo/Gif Area */
+        .media-box {
+            width: 100%;
+            height: 200px;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            background: #fff;
+        }
+        
+        .media-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Keeps entire image visible */
+        }
+
+        /* Typography */
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            color: var(--primary);
+            font-size: 2.8rem;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.5);
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            min-height: 60px; /* Space for growing button */
+            align-items: center;
+        }
+
+        button {
+            padding: 14px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            font-family: 'Nunito', sans-serif;
+            white-space: nowrap;
+        }
+
+        .yes-btn {
+            background: linear-gradient(45deg, #ff3366, #ff5c8a);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 51, 102, 0.4);
+        }
+
+        .yes-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 51, 102, 0.6);
+        }
+
+        .no-btn {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        /* --- SUCCESS SCREEN --- */
+        #success-screen {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            animation: zoomIn 0.5s ease;
+        }
+
+        @keyframes zoomIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .action-btn {
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .whatsapp { background-color: #25D366; }
+        .calendar { background-color: #4285F4; }
+
+        /* --- OVERLAY --- */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            transition: opacity 0.5s;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=romantic-piano-11007.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="falling-bg" id="bgContainer"></div>
+
+    <div id="overlay">
+        <h2 style="font-family: 'Dancing Script'; font-size: 3rem; margin-bottom: 20px;">For You...</h2>
+        <button class="yes-btn" onclick="startExperience()">Tap to Open 💌</button>
+    </div>
+
+    <div class="card">
+        <div class="media-box">
+            <img id="mainGif" src="https://media.tenor.com/utP1W2tLd5kAAAAi/cute-cat-love.gif" alt="Cute Gif">
+        </div>
+
+        <h1 id="title">Will you be my Valentine?</h1>
+        <p id="subtitle">I promise to make it special! 🥺</p>
+
+        <div class="btn-group" id="btnGroup">
+            <button class="yes-btn" id="yesBtn" onclick="sheSaidYes()">YES!</button>
+            <button class="no-btn" id="noBtn" onmouseover="dodgeNo()" ontouchstart="dodgeNo()">No</button>
+        </div>
+
+        <div id="success-screen">
+            <h3>Yay! Best Decision Ever! ❤️</h3>
+            <p>Let me know you saw this!</p>
+            
+            <a href="https://wa.me/910000000000?text=I%20said%20YES!%20%F0%9F%92%96%20Can't%20wait!" class="action-btn whatsapp">
+                <span>Send "I said YES" 💬</span>
+            </a>
+            
+            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Valentine's+Date&dates=20240214T180000/20240214T220000" target="_blank" class="action-btn calendar">
+                <span>Add to Calendar 📅</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const overlay = document.getElementById('overlay');
+        const music = document.getElementById('bgMusic');
+        const bgContainer = document.getElementById('bgContainer');
+        const title = document.getElementById('title');
+        const subtitle = document.getElementById('subtitle');
+        const mainGif = document.getElementById('mainGif');
+        const btnGroup = document.getElementById('btnGroup');
+        const successScreen = document.getElementById('success-screen');
+
+        let attempts = 2;
+        const noTexts = ["No", "Are you sure?", "Really?", "Don't do this!", "Pookie please?", "Last chance!", "Have a heart!"];
+
+        // 1. START EXPERIENCE
+        function startExperience() {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 500);
+            music.volume = 0.5;
+            music.play().catch(e => console.log(e));
+            createFallingBackground(); // Start falling hearts
+        }
+
+        // 2. CREATE FALLING BACKGROUND (Ribbons/Hearts)
+        function createFallingBackground() {
+            const symbols = ['❤️', '🎀', '🌹', '💖']; // Hearts, Ribbons, Roses
+            
+            setInterval(() => {
+                const el = document.createElement('div');
+                el.classList.add('fall-item');
+                el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.fontSize = Math.random() * 20 + 15 + 'px';
+                el.style.animationDuration = Math.random() * 3 + 5 + 's'; // Slow fall 5-8s
+                el.style.opacity = Math.random() * 0.5 + 0.3;
+                
+                bgContainer.appendChild(el);
+                
+                // Cleanup
+                setTimeout(() => el.remove(), 8000);
+            }, 300);
+        }
+
+        // 3. TRICKY NO BUTTON
+        function dodgeNo() {
+            attempts++;
+
+            // 1. Change Text
+            if (attempts < noTexts.length) {
+                noBtn.innerText = noTexts[attempts];
+            }
+
+            // 2. Move Randomly
+            const width = window.innerWidth - 100;
+            const height = window.innerHeight - 100;
+            const x = Math.max(20, Math.random() * width);
+            const y = Math.max(20, Math.random() * height);
+            
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = x + 'px';
+            noBtn.style.top = y + 'px';
+
+            // 3. Make Yes Button Grow
+            let scale = 1 + (attempts * 0.15);
+            yesBtn.style.transform = `scale(${scale})`;
+            yesBtn.innerText = "YES! " + "❤️".repeat(attempts);
+            
+            // 4. Force Yes state
+            if (attempts > 7) {
+                noBtn.style.display = 'none'; // Hide No button completely
+                yesBtn.style.transform = 'scale(1.5)';
+                title.innerText = "Okay, the 'No' button is broken...";
+                subtitle.innerText = "You have to say yes now! 😈";
+            }
+        }
+
+        // 4. SHE SAID YES
+        function sheSaidYes() {
+            // Confetti Ribbon Explosion (School Pride preset)
+            var end = Date.now() + (3 * 1000);
+            var colors = ['#ff3366', '#ffffff'];
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: colors
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: colors
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+
+            // UI Changes
+            btnGroup.style.display = 'none';
+            subtitle.style.display = 'none';
+            title.innerText = "YAY! See you soon! ❤️";
+            mainGif.src = "https://media.tenor.com/gUiu1zyxfzYAAAAi/bear-kiss-bear-kisses.gif";
+            successScreen.style.display = 'flex';
+        }
+        // 6. TAB TITLE CHANGER
+        let docTitle = document.title;
+        window.addEventListener("blur", () => { document.title = "Come back! 🥺"; });
+        window.addEventListener("focus", () => { document.title = docTitle; });
+    </script>
+</body>
+</html>
